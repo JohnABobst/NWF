@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+
+<h1>Your current games</h1>
+
+  {% for game in games %}
+    {% if user in game.players.all and game.in_progress == True %}
+  <ol>
+    <h2>
+      <li>
+        <a href="{% url 'game:game_details' pk=game.id %}">Game {{game.pk}}</a>
+      </li>
+    </h2>
+  </ol>
+    {% endif %}
+  {% endfor %}
+<h1>Available games</h1>
+<ol>
+  {% for game in games %}
+    {% if game.start == False %}
+  <h2><li>
+    <a href="{% url 'game:game_details' pk=game.id %}">Game {{game.pk}}</a>
+
+  </li></h2>
+    {% endif %}
+  {% endfor %}
+</ol>
+<h1>Create a game</h1>
+<a class ="btn btn-primary" role='button' href="{% url 'game:create_game' %}">Click here to create a game!</a>
+{% endif %}
+
+
+
+
+{% endblock %}

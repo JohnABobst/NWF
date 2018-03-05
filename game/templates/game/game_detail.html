@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% load bootstrap4 %}
+
+{% block content %}
+
+  <h1>Game  </h1>
+{{object}}
+  <h3>Rounds {{object.number_of_rounds}}</h3>
+<div class="content">
+  <h3>Current round = {{object.round}}</h3>
+    <h1>Players</h1>
+    {% for player in object.players.all %}
+
+    <ul>
+      <li>{{ player }} {{submission}}</li>
+    </ul>
+    {% endfor %}
+  <h1>We will notify you once your game has enough players to begin.</h1>
+
+  <form method='POST'>
+    {% csrf_token %}
+    {% if object.number_of_players > object.players.count  %}
+    <h1>Would you like to join this game?</h1>
+
+    <a class='btn btn-primary' href="{% url 'game:join' pk=object.pk %}">Join Game</a>
+    {% elif object.number_of_players == object.players.count %}
+    <a class='btn btn-primary' href="{% url 'game:start' pk=object.pk %}">Start Game</a>
+    {% else %}
+
+    {% endif %}
+
+
+  </form>
+
+
+
+
+</div>
+
+{% endblock %}

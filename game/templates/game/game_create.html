@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load bootstrap4 %}
+{% block content %}
+<div class="jumbotron">
+  <h1 class="display-3">To create a game, fill out the form below</h1>
+</div>
+
+<form method="POST">
+  {% csrf_token %}
+  {% bootstrap_form form %}
+  <input class="btn btn-primary" type="Submit" name="" value="Create Game">
+</form>
+
+
+
+  {% endblock %}
