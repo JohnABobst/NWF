@@ -7,16 +7,13 @@ import string
 User=get_user_model()
 # Create your models here.
 class magic_card(models.Model):
-    
-    def gen_card_name():
-        return ''.join(random.choice(string.ascii_uppercase) for _ in range(5))
 
-    card_name = models.CharField(max_length=256, default='card name')
 
     player = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions')
     game= models.ForeignKey(Game, on_delete=models.CASCADE, related_name='submissions', null=True, blank=True)
-
-    round_submitted = models.IntegerField(default=1)
+    round_submitted = models.IntegerField()
+    chosen = models.BooleanField(default=False)
+    card_name = Game.get_card_name
 
     BLUE = "U"
     RED = "R"
@@ -32,11 +29,11 @@ class magic_card(models.Model):
         (GREEN, "Green"),
         )
 
-    ENCHANTMENT = "EN"
-    ARTIFACT = "AR"
-    CREATURE = "CR"
-    LAND = "LA"
-    PLANESWALKER = "PL"
+    ENCHANTMENT = "Enchantment"
+    ARTIFACT = "Atifact"
+    CREATURE = "Creature"
+    LAND = "Land"
+    PLANESWALKER = "Planeswalker"
 
     card_types = (
         (ENCHANTMENT, "Enchantment"),
@@ -48,12 +45,12 @@ class magic_card(models.Model):
 
 
     card_color = models.CharField(
-        max_length = 5,
+        max_length = 15,
         choices = mana_colors
     )
 
     card_type = models.CharField(
-        max_length = 5,
+        max_length = 15,
         choices = card_types
     )
 

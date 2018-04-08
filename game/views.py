@@ -4,16 +4,18 @@ from django.views.generic import TemplateView, DetailView, ListView, FormView
 from django.urls import reverse_lazy, reverse
 from game.forms import game_create_form
 from game.models import Game,  InGame
+from submissions.models import magic_card
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic.edit import FormMixin
 from django.views.generic.base import RedirectView
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.db import IntegrityError
-from django.contrib.auth import get_user
+from django.contrib.auth import get_user, get_user_model
+
 # Create your views here.
 
-
+User=get_user_model()
 
 class CreateGameView(FormView):
     model = Game
@@ -32,9 +34,6 @@ class CreateGameView(FormView):
 class Waiting(TemplateView):
     template_name = "game/waiting.html"
 
-
-
-
 class GameDetail(DetailView):
     context_object_name = 'game_details'
     model = Game
@@ -45,12 +44,15 @@ class GameDetail(DetailView):
         context = super().get_context_data(**kwargs)
         return context
 
+
 class JoinGame(LoginRequiredMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         return reverse('game:game_details', kwargs={'pk': self.kwargs.get('pk')})
 
     def get(self,request,*args,**kwargs):
         game = get_object_or_404(Game, pk=self.kwargs.get('pk'))
+        game.start = True
+        game.in_progress= True
         try:
             InGame.objects.create(player=self.request.user, game=game)
         except IntegrityError:
@@ -71,3 +73,17 @@ class StartGame(LoginRequiredMixin, RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         return reverse('submissions:card_submission', kwargs={'pk':self.kwargs.get('pk'), 'username': self.request.user })
+
+
+class SelectCard(LoginRequiredMixin, RedirectView):
+    def get(self, request, *args, **kwargs):
+        game = Game.objects.get(pk=self.kwargs.get('pk'))
+        player = User.objects.get(username=self.kwargs.get('player'))
+        card = magic_card.objects.get(game=game, player=player)
+        update = InGame.objects.get(game=game, player=player)
+        update.score += 1
+        update.save()
+        return super().get(request, *args, **kwargs)
+
+    def get_redirect_url(self, *args, **kwargs):
+        return reverse('game:game_details', kwargs={'pk': self.kwargs.get('pk')})

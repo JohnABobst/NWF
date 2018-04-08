@@ -1,0 +1,19 @@
+{% load custom_tags %}
+
+{% if card.player == player%}
+<h1> </h1>
+<li> {{player}} </li>
+  <div class="card">
+    <li>{{card.card_name}}</li>
+    <li>{{card.card_text}}</li>
+    <li>{{card.converted_mana_cost}}</li>
+    <li>{{card.flavor_text}}</li>
+    <li>{{card.card_type}}</li>
+    <li>{{card.card_color}}</li>
+    {% is_judging object.players.all object.judging as judge %}
+    {% if user == judge %}
+    <a class='btn btn-primary' href="{% url 'game:select' pk=object.pk player=card.player card_name=card.card_name  %}" >Select</a>
+    {% endif %}
+
+  </div>
+{% endif %}

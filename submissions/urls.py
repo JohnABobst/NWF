@@ -9,5 +9,8 @@ urlpatterns = [
     name='waiting_submissions'),
     path('card_submission/<slug:pk>/<str:username>', views.CardSubmissionView.as_view(),
     name='card_submission'),
+    path('card_details/<slug:pk>/<str:username>/<str:round_submitted>', views.CardDetailView.as_view(),
+    name='card_details'),
+
 
 ]

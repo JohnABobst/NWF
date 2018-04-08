@@ -1,19 +1,23 @@
 {% extends "base.html" %}
-
 {% load bootstrap4 %}
+{% load my_tags %}
+
 
 {% block content %}
 
   <h1>Game  </h1>
-{{object}}
+
+
   <h3>Rounds {{object.number_of_rounds}}</h3>
 <div class="content">
   <h3>Current round = {{object.round}}</h3>
+  <h3>Judge = {% is_judging object.players.all object.judging %} </h3>
     <h1>Players</h1>
+
     {% for player in object.players.all %}
 
     <ul>
-      <li>{{ player }} {{submission}}</li>
+      <li>{{ player }} {% player_score object player %}</li>
     </ul>
     {% endfor %}
   <h1>We will notify you once your game has enough players to begin.</h1>
@@ -27,8 +31,23 @@
     {% elif object.number_of_players == object.players.count %}
     <a class='btn btn-primary' href="{% url 'game:start' pk=object.pk %}">Start Game</a>
     {% else %}
+      <h1>Here are the cards that have been submitted!</h1>
 
     {% endif %}
+    {% for player in object.players.all %}
+      {% for card in object.submissions.all %}
+        {% include "submissions/_submissions.html" %}
+      {% endfor %}
+    {% endfor %}
+
+
+
+
+
+
+      <li></li>
+
+
 
 
   </form>
