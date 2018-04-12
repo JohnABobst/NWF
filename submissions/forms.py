@@ -9,4 +9,4 @@ class CardSubmission(forms.ModelForm):
 
     class Meta:
         model = magic_card
-        fields = [ 'card_name', 'converted_mana_cost', 'card_color','card_type','card_text', 'flavor_text']
+        fields = [ 'converted_mana_cost', 'card_color','card_type','card_text', 'flavor_text']
