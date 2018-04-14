@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load my_tags %}
 {% block content %}
 
 {% if user.is_authenticated %}
@@ -8,26 +8,37 @@
 
   {% for game in games %}
     {% if user in game.players.all and game.in_progress == True %}
-  <ol>
+  <ul>
     <h2>
       <li>
         <a href="{% url 'game:game_details' pk=game.id %}">Game {{game.pk}}</a>
       </li>
     </h2>
-  </ol>
+  </ul>
+   {% elif user in game.players.all and game.in_progress == False %}
+   <h1>Games waiting for players</h1>
+   <ul>
+     <h2>
+       <li>
+         <a href="{% url 'game:game_details' pk=game.id %}">Game {{game.pk}}</a>
+       </li>
+     </h2>
+   </ul>
     {% endif %}
   {% endfor %}
 <h1>Available games</h1>
 <ol>
   {% for game in games %}
-    {% if game.start == False %}
-  <h2><li>
-    <a href="{% url 'game:game_details' pk=game.id %}">Game {{game.pk}}</a>
-
-  </li></h2>
+    {% if game.start == False and user not in game.players.all %}
+  <h2><li><a href="{% url 'game:game_details' pk=game.id %}">Game {{game.pk}}</a>  </li></h2>
     {% endif %}
   {% endfor %}
 </ol>
+{% available_games games user as available %}
+{% if available == False %}
+<h1>There are no available games, click below to create one</h1>
+{% endif %}
+</br>
 <h1>Create a game</h1>
 <a class ="btn btn-primary" role='button' href="{% url 'game:create_game' %}">Click here to create a game!</a>
 {% endif %}

@@ -14,7 +14,7 @@ class magic_card(models.Model):
     round_submitted = models.IntegerField()
     chosen = models.BooleanField(default=False)
     card_name = models.CharField(max_length=1000)
-
+    submitted = models.BooleanField(default=False)
     BLUE = "U"
     RED = "R"
     WHITE = "W"

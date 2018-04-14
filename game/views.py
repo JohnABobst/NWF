@@ -30,7 +30,6 @@ class CreateGameView(FormView):
         game.card_name = game.get_card_name()
         game.save()
         InGame.objects.create(player=self.request.user, game=game, score=0)
-
         return super().form_valid(form)
 
 class Waiting(TemplateView):
@@ -71,13 +70,24 @@ class StartGame(LoginRequiredMixin, RedirectView):
         game.in_progress = True
         game.start = True
         for player in game.players.all():
-            card = magic_card.objects.create(player=player, game=game, card_name=game.card_name, round_submitted=game.round)
-            card.save()
+            if magic_card.objects.filter(player=player, game=game, card_name=game.card_name, round_submitted=game.round).exists() == False:
+                card = magic_card.objects.create(player=player, game=game, card_name=game.card_name, round_submitted=game.round)
+                card.save()
         game.save()
         return super().get(request,*args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
-        return reverse('submissions:card_submission', kwargs={'pk':self.kwargs.get('pk')})
+        game = get_object_or_404(Game, pk=self.kwargs.get('pk'))
+        card = magic_card.objects.get(game=game, player=self.request.user, round_submitted=game.round)
+        return reverse('submissions:card_submission', kwargs={'pk':card.pk})
+
+class SubmitCard(LoginRequiredMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        game = get_object_or_404(Game, pk=self.kwargs.get('pk'))
+        card = magic_card.objects.get(game=game, player=self.request.user, round_submitted=game.round)
+        return reverse('submissions:card_submission', kwargs={'pk':card.pk})
+
+
 
 
 class SelectCard(LoginRequiredMixin, RedirectView):
@@ -100,5 +110,12 @@ class SelectCard(LoginRequiredMixin, RedirectView):
         update.save()
         return super().get(request, *args, **kwargs)
 
+
     def get_redirect_url(self, *args, **kwargs):
         return reverse('game:game_details', kwargs={'pk': self.kwargs.get('pk')})
+
+# class GameOver(TemplateView):
+#     template_name = 'game/game_over.html'
+#     def get(self, request, *args, **kwargs):
+#         game = Game.objects.get(pk=self.kwargs.get('pk'))
+#         return super().get(request, *args, *kwargs)

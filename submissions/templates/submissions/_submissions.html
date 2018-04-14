@@ -1,6 +1,6 @@
 {% load custom_tags %}
 
-{% if card.player == player%}
+{% if card.player == player and card.submitted == True %}
 <h1> </h1>
 <li> {{player}} </li>
   <div class="card">

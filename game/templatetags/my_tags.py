@@ -4,8 +4,10 @@ from django.contrib.auth import get_user_model
 from submissions.models import magic_card
 register = template.Library()
 
+
 User = get_user_model()
-@register.simple_tag
+
+@register.simple_tag()
 def is_judging(list, index):
 
     return list[index]
@@ -25,3 +27,20 @@ def submission_url(instance, duder):
         thisplayer = User.objects.get(username=duder)
         card = magic_card.objects.get(game=instance, player=thisplayer, round_submitted=instance.round)
         return card.pk
+
+@register.simple_tag()
+def available_games(games, user):
+
+    for game in games:
+        available = False
+        if game.in_progress == False and user in game.players.all():
+            available = True
+        return available
+
+@register.simple_tag()
+def winner(instance):
+    scores = {}
+    for player in instance.players.all():
+        score = InGame.objects.get(game=instance, player=player)
+        scores[player] = score.score
+    return max(scores, key=scores.get)

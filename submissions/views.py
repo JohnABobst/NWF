@@ -18,6 +18,11 @@ class CardSubmissionView(UpdateView):
     success_url = reverse_lazy('submissions:waiting_submissions')
     form_class = CardSubmission
 
+    def form_valid(self, form):
+        form.instance.submitted = True
+        
+        return super().form_valid(form)
+
 
 
 
