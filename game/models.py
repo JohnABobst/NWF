@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
 # Create your models here.
-import misaka
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse_lazy, resolve, reverse
@@ -12,6 +11,8 @@ import sys
 import random
 import string
 import os
+from django.core.mail import send_mail
+from django.conf import settings
 
 User = get_user_model()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,6 +27,18 @@ class Game(models.Model):
     number_of_rounds = models.IntegerField()
     players = models.ManyToManyField(User, through='InGame')
     card_name = models.CharField(max_length=1000)
+
+    def notify_players(self, subject, message):
+        recipient_list = []
+        for player in self.players.all():
+            recipient_list.append(str(player.email))
+
+        send_mail(
+            subject,
+            message,
+            settings.EMAIL_HOST_USER,
+            recipient_list,
+            )
     def get_card_name(self):
 
         with open(WORDS_DIR + "/names.txt") as f:

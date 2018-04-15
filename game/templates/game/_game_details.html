@@ -1,7 +1,7 @@
 {% load my_tags %}
 {% is_judging object.players.all object.judging as judge %}
   <h1>Game  </h1>
-  {{object.players.count}}
+  
   {{object.card_name}}
   <h3>Rounds {{object.number_of_rounds}}</h3>
 <div class="content">
@@ -13,14 +13,15 @@
       <li>{{ player }} {% player_score object player %}</li>
     </ul>
     {% endfor %}
-  <h1>We will notify you once your game has enough players to begin.</h1>
+
 
   <form method='POST'>
     {% csrf_token %}
     {% if object.number_of_players > object.players.count %}
     <h1>Would you like to join this game?</h1>
-
     <a class='btn btn-primary' href="{% url 'game:join' pk=object.pk %}">Join Game</a>
+    {% elif user in object.players.all and object.number_of_players > object.players.count %}
+    <h1>We will notify you once your game has enough players to begin.</h1>
     {% elif object.number_of_players == object.players.count and object.in_progress == False %}
     <a class='btn btn-primary' href="{% url 'game:start' pk=object.pk %}">Start Game</a>
     {% elif object.in_progress == True and user != judge %}
