@@ -39,8 +39,8 @@ class Game(models.Model):
             settings.EMAIL_HOST_USER,
             recipient_list,
             )
-    def get_card_name(self):
 
+    def get_card_name(self):
         with open(WORDS_DIR + "/names.txt") as f:
             list_names = f.read().splitlines()
         f.close()
