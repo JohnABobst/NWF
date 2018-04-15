@@ -13,6 +13,7 @@ from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.contrib.auth import get_user, get_user_model
 
+
 # Create your views here.
 
 User=get_user_model()
@@ -61,6 +62,7 @@ class JoinGame(LoginRequiredMixin, RedirectView):
         else:
             messages.success(self.request, 'You have successfully joined this game')
 
+
         return super().get(request,*args, **kwargs)
 
 
@@ -69,11 +71,15 @@ class StartGame(LoginRequiredMixin, RedirectView):
         game = get_object_or_404(Game, pk=self.kwargs.get('pk'))
         game.in_progress = True
         game.start = True
+        subject = 'Your game has started!'
+        message = ('Enough players have signed up to begin playing.  Follow the link to submit a card.')
+        game.notify_players(subject, message)
         for player in game.players.all():
             if magic_card.objects.filter(player=player, game=game, card_name=game.card_name, round_submitted=game.round).exists() == False:
                 card = magic_card.objects.create(player=player, game=game, card_name=game.card_name, round_submitted=game.round)
                 card.save()
         game.save()
+
         return super().get(request,*args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
@@ -85,7 +91,13 @@ class SubmitCard(LoginRequiredMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         game = get_object_or_404(Game, pk=self.kwargs.get('pk'))
         card = magic_card.objects.get(game=game, player=self.request.user, round_submitted=game.round)
+        cards_submitted_this_round = magic_card.objects.filter(game=game, round_submitted=game.round)
+        if cards_submitted_this_round.count() == game.number_of_players -1:
+            subject = 'All players have submitted their cards this round'
+            message = 'Follow the link to view the cards.'
+            game.notify_players(subject,message)
         return reverse('submissions:card_submission', kwargs={'pk':card.pk})
+
 
 
 
@@ -96,6 +108,8 @@ class SelectCard(LoginRequiredMixin, RedirectView):
         player = User.objects.get(username=self.kwargs.get('player'))
         card = magic_card.objects.get(game=game, player=player, card_name=game.card_name)
         update = InGame.objects.get(game=game, player=player)
+        subject = 'A card has been chosen'
+        message = 'Follow the link to see which card won this round'
         game.round += 1
         game.card_name = game.get_card_name()
         if game.judging == game.players.count()-1:
@@ -113,9 +127,3 @@ class SelectCard(LoginRequiredMixin, RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         return reverse('game:game_details', kwargs={'pk': self.kwargs.get('pk')})
-
-# class GameOver(TemplateView):
-#     template_name = 'game/game_over.html'
-#     def get(self, request, *args, **kwargs):
-#         game = Game.objects.get(pk=self.kwargs.get('pk'))
-#         return super().get(request, *args, *kwargs)

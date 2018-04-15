@@ -31,7 +31,6 @@ urlpatterns = [
         path('submit/<slug:pk>', views.SubmitCard.as_view(),
         name='submit'),
 
-        # path('game_over/<slug:pk>', views.GameOver.as_view(),
-        # name='game_over'),
+        
 
         ]
