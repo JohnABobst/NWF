@@ -1,6 +1,6 @@
 {% load custom_tags %}
 
-{% if card.player == player%}
+{% if card.player == player and card.submitted == True %}
 <h1> </h1>
 <li> {{player}} </li>
   <div class="card">
@@ -12,7 +12,7 @@
     <li>{{card.card_color}}</li>
     {% is_judging object.players.all object.judging as judge %}
     {% if user == judge %}
-    <a class='btn btn-primary' href="{% url 'game:select' pk=object.pk player=card.player card_name=card.card_name  %}" >Select</a>
+    <a class='btn btn-primary' href="{% url 'game:select' pk=object.pk player=card.player %}">Select</a>
     {% endif %}
 
   </div>

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load my_tags %}
+{% block content %}
+{% winner game as won %}
+<h1>You have completed the game!</h1>
+{% for player in objects.players.all %}
+<ul>
+  <li>{{player}} Score = {% player_score context player %}</li>
+</ul>
+  {% if player == won %}
+  <h1>{{player}} won the game!</h1>
+  {% endif %}
+{% endfor %}
+
+
+
+{% endblock %}

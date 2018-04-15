@@ -1,6 +1,6 @@
 from django.urls import path, re_path
 from django.contrib.auth import views as auth_views
-from game.views import CreateGameView, GameDetail, Waiting, JoinGame, StartGame
+from game.views import CreateGameView, GameDetail, Waiting, JoinGame, StartGame, SubmitCard
 from . import views
 
 
@@ -18,13 +18,20 @@ urlpatterns = [
 
         path('game_details/<slug:pk>/', views.GameDetail.as_view(),
         name='game_details'),
+
         path('join/<slug:pk>/', views.JoinGame.as_view(),
         name='join'),
 
         path('start/<slug:pk>', views.StartGame.as_view(),
         name='start'),
 
-        path('select/<slug:pk>/<slug:player>/<slug:card_name>', views.SelectCard.as_view(),
+        path('select/<slug:pk>/<slug:player>', views.SelectCard.as_view(),
         name='select'),
+
+        path('submit/<slug:pk>', views.SubmitCard.as_view(),
+        name='submit'),
+
+        # path('game_over/<slug:pk>', views.GameOver.as_view(),
+        # name='game_over'),
 
         ]

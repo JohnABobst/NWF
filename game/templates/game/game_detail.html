@@ -1,59 +1,31 @@
 {% extends "base.html" %}
 {% load bootstrap4 %}
 {% load my_tags %}
-
-
 {% block content %}
 
-  <h1>Game  </h1>
+{% winner object as won %}
+{% submission_url object user as card_url %}
 
+{% if object.round > object.number_of_rounds %}
 
-  <h3>Rounds {{object.number_of_rounds}}</h3>
-<div class="content">
-  <h3>Current round = {{object.round}}</h3>
-  <h3>Judge = {% is_judging object.players.all object.judging %} </h3>
-    <h1>Players</h1>
+<h1>You have completed the game!</h1>
+{% for player in object.players.all %}
+{% if player == won %}
+<h1>{{player}} won the game!</h1>
 
-    {% for player in object.players.all %}
-
-    <ul>
-      <li>{{ player }} {% player_score object player %}</li>
-    </ul>
-    {% endfor %}
-  <h1>We will notify you once your game has enough players to begin.</h1>
-
-  <form method='POST'>
-    {% csrf_token %}
-    {% if object.number_of_players > object.players.count  %}
-    <h1>Would you like to join this game?</h1>
-
-    <a class='btn btn-primary' href="{% url 'game:join' pk=object.pk %}">Join Game</a>
-    {% elif object.number_of_players == object.players.count %}
-    <a class='btn btn-primary' href="{% url 'game:start' pk=object.pk %}">Start Game</a>
-    {% else %}
-      <h1>Here are the cards that have been submitted!</h1>
-
-    {% endif %}
-    {% for player in object.players.all %}
-      {% for card in object.submissions.all %}
-        {% include "submissions/_submissions.html" %}
-      {% endfor %}
-    {% endfor %}
+{% else %}
+<ul>
+  <li>{{ player }} {% player_score object player %}</li>
+</ul>
+{% endif %}
+{% endfor %}
 
 
 
+{% elif object.round <= object.number_of_rounds %}
+{% include "game/_game_details.html" %}
 
-
-
-      <li></li>
-
-
-
-
-  </form>
-
-
-
+{% endif %}
 
 </div>
 

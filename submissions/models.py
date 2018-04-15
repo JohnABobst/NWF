@@ -10,11 +10,11 @@ class magic_card(models.Model):
 
 
     player = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions')
-    game= models.ForeignKey(Game, on_delete=models.CASCADE, related_name='submissions', null=True, blank=True)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='submissions', null=True, blank=True)
     round_submitted = models.IntegerField()
     chosen = models.BooleanField(default=False)
-    card_name = Game.get_card_name
-
+    card_name = models.CharField(max_length=1000)
+    submitted = models.BooleanField(default=False)
     BLUE = "U"
     RED = "R"
     WHITE = "W"
