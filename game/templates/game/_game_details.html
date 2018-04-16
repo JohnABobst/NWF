@@ -1,7 +1,8 @@
 {% load my_tags %}
 {% is_judging object.players.all object.judging as judge %}
+{% has_submitted object user as submitted %}
   <h1>Game  </h1>
-  
+
   {{object.card_name}}
   <h3>Rounds {{object.number_of_rounds}}</h3>
 <div class="content">
@@ -24,7 +25,7 @@
     <h1>We will notify you once your game has enough players to begin.</h1>
     {% elif object.number_of_players == object.players.count and object.in_progress == False %}
     <a class='btn btn-primary' href="{% url 'game:start' pk=object.pk %}">Start Game</a>
-    {% elif object.in_progress == True and user != judge %}
+    {% elif object.in_progress == True and user != judge and submitted == False %}
     <a class='btn btn-primary' href="{% url 'game:submit' pk=object.pk %}">Submit your card</a>
     {% else %}
       <h1>Here are the cards that have been submitted!</h1>

@@ -44,3 +44,11 @@ def winner(instance):
         score = InGame.objects.get(game=instance, player=player)
         scores[player] = score.score
     return max(scores, key=scores.get)
+
+@register.simple_tag()
+def has_submitted(instance, player):
+    card = magic_card.objects.get(game=instance, player=player, round_submitted=instance.round)
+    if card.submitted == True:
+        return True
+    else:
+        return False
