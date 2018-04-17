@@ -72,7 +72,8 @@ class StartGame(LoginRequiredMixin, RedirectView):
         game.in_progress = True
         game.start = True
         subject = 'Your game has started!'
-        message = ('Enough players have signed up to begin playing.  Follow the link to submit a card.')
+        message = ('Enough players have signed up to begin playing.  Follow the link to submit a card.' + "\n <href= 'http://johnabobst.pythonanywhere.com/submissions/card_submission/'" + str(card.pk)
+        +'>')
         game.notify_players(subject, message)
         for player in game.players.all():
             if magic_card.objects.filter(player=player, game=game, card_name=game.card_name, round_submitted=game.round).exists() == False:

@@ -15,12 +15,12 @@ class WaitingSubmissions(TemplateView):
 class CardSubmissionView(UpdateView):
     model = magic_card
     template_name = 'submissions/card_submission.html'
-    success_url = reverse_lazy('submissions:waiting_submissions')
+    success_url = reverse_lazy('submissions:waiting_submission')
     form_class = CardSubmission
 
     def form_valid(self, form):
         form.instance.submitted = True
-        
+
         return super().form_valid(form)
 
 

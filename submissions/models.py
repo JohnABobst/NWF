@@ -34,6 +34,8 @@ class magic_card(models.Model):
     CREATURE = "Creature"
     LAND = "Land"
     PLANESWALKER = "Planeswalker"
+    SORCERY = "Sorcery"
+    INSTANT = "Instant"
 
     card_types = (
         (ENCHANTMENT, "Enchantment"),
@@ -41,6 +43,8 @@ class magic_card(models.Model):
         (CREATURE, "Creature"),
         (LAND, "Land"),
         (PLANESWALKER, "Planeswalker"),
+        (SORCERY, "Sorcery"),
+        (INSTANT, "Instant")
     )
 
 
