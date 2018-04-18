@@ -47,8 +47,9 @@ def winner(instance):
 
 @register.simple_tag()
 def has_submitted(instance, player):
-    card = magic_card.objects.get(game=instance, player=player, round_submitted=instance.round)
-    if card.submitted == True:
-        return True
-    else:
-        return False
+    if instance.in_progress == True:
+        card = magic_card.objects.get(game=instance, player=player, round_submitted=instance.round)
+        if card.submitted == True:
+            return True
+        else:
+            return False

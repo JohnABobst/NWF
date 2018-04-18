@@ -18,13 +18,21 @@ from django.contrib.auth import get_user, get_user_model
 
 User=get_user_model()
 
+
+def get_card(game, player):
+    try:
+        this_card = magic_card.objects.get(player=player, game=game,round_submitted=game.round)
+        return(this_card)
+    except:
+        this_card = magic_card.objects.create(player=player, game=game, card_name=game.card_name)
+        this_card.save()
+        return(this_card)
+
 class CreateGameView(FormView):
     model = Game
     template_name = 'game/game_create.html'
     form_class = game_create_form
     success_url = reverse_lazy('game:waiting')
-
-
     def form_valid(self, form):
         form.save()
         game = form.instance
@@ -61,8 +69,6 @@ class JoinGame(LoginRequiredMixin, RedirectView):
             messages.warning(self.request, 'You have already joined this game')
         else:
             messages.success(self.request, 'You have successfully joined this game')
-
-
         return super().get(request,*args, **kwargs)
 
 
@@ -71,27 +77,30 @@ class StartGame(LoginRequiredMixin, RedirectView):
         game = get_object_or_404(Game, pk=self.kwargs.get('pk'))
         game.in_progress = True
         game.start = True
-        subject = 'Your game has started!'
-        message = ('Enough players have signed up to begin playing.  Follow the link to submit a card.' + "\n <href= 'http://johnabobst.pythonanywhere.com/submissions/card_submission/'" + str(card.pk)
-        +'>')
-        game.notify_players(subject, message)
         for player in game.players.all():
             if magic_card.objects.filter(player=player, game=game, card_name=game.card_name, round_submitted=game.round).exists() == False:
                 card = magic_card.objects.create(player=player, game=game, card_name=game.card_name, round_submitted=game.round)
                 card.save()
+        card = get_card(game, self.request.user)
+        subject = 'Your game has started!'
+        message = ('Enough players have signed up to begin playing.  Follow the link to submit a card.' + "\n <href= 'http://johnabobst.pythonanywhere.com/submissions/card_submission/'" + str(card.pk)
+        +'>')
+        game.notify_players(subject, message)
         game.save()
-
         return super().get(request,*args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
         game = get_object_or_404(Game, pk=self.kwargs.get('pk'))
-        card = magic_card.objects.get(game=game, player=self.request.user, round_submitted=game.round)
-        return reverse('submissions:card_submission', kwargs={'pk':card.pk})
+
+        if self.request.user.username == game.judge(game.round):
+            return reverse('game:game_details', kwargs={'pk':self.pk})
+        else:
+            return reverse('submissions:card_submission', kwargs={'pk':card.pk})
 
 class SubmitCard(LoginRequiredMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         game = get_object_or_404(Game, pk=self.kwargs.get('pk'))
-        card = magic_card.objects.get(game=game, player=self.request.user, round_submitted=game.round)
+        card = get_card(game, self.request.user)
         cards_submitted_this_round = magic_card.objects.filter(game=game, round_submitted=game.round)
         if cards_submitted_this_round.count() == game.number_of_players -1:
             subject = 'All players have submitted their cards this round'
@@ -107,7 +116,7 @@ class SelectCard(LoginRequiredMixin, RedirectView):
     def get(self, request, *args, **kwargs):
         game = Game.objects.get(pk=self.kwargs.get('pk'))
         player = User.objects.get(username=self.kwargs.get('player'))
-        card = magic_card.objects.get(game=game, player=player, card_name=game.card_name)
+        card = get_card(game, player)
         update = InGame.objects.get(game=game, player=player)
         subject = 'A card has been chosen'
         message = 'Follow the link to see which card won this round'
