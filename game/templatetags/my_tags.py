@@ -24,9 +24,16 @@ def player_score(instance, duder):
 @register.simple_tag()
 def submission_url(instance, duder):
     if instance.in_progress == True:
-        thisplayer = User.objects.get(username=duder)
-        card = magic_card.objects.get(game=instance, player=thisplayer, round_submitted=instance.round)
-        return card.pk
+        try:
+            thisplayer = User.objects.get(username=duder)
+            card = magic_card.objects.get(game=instance, player=thisplayer, round_submitted=instance.round)
+
+        except:
+            pass
+
+        else:
+            return card.pk
+
 
 @register.simple_tag()
 def available_games(games, user):
@@ -47,9 +54,21 @@ def winner(instance):
 
 @register.simple_tag()
 def has_submitted(instance, player):
+    submitted = False
     if instance.in_progress == True:
-        card = magic_card.objects.get(game=instance, player=player, round_submitted=instance.round)
-        if card.submitted == True:
-            return True
-        else:
-            return False
+        try:
+            card = magic_card.objects.get(game=instance, player=player, card_name=instance.card_name)
+            if card.submitted == True:
+                submitted = True
+        except:
+            submitted = False
+
+    return submitted
+
+# Code to create a list of rounds i.e '123' so that they can be looped through in template.
+@register.simple_tag()
+def rounds_as_list(instance):
+    list = []
+    for i in range(1, (instance.round) ,1):
+        list.append(i)
+    return list

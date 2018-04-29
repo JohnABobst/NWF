@@ -20,15 +20,18 @@ class CardSubmissionView(UpdateView):
 
     def form_valid(self, form):
         form.instance.submitted = True
+        subject = 'A card has been submitted'
+        message = ('Follow the link to view the card' + "\n <href= 'http://www.nerdsconamigos.com/submissions/card_detail/" + str(form.instance.pk)+"'>")
+        form.instance.game.notify_players(subject, message)
         return super().form_valid(form)
 
-
-
-
-
-
 class CardDetailView(DetailView):
-    context_object_name = 'submission_details'
+    context_object_name = 'card_details'
     model = magic_card
     template_name = 'submissions/card_detail.html'
-    success_url = reverse_lazy('submissions:waiting')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+

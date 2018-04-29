@@ -1,40 +1,92 @@
 {% load my_tags %}
 {% is_judging object.players.all object.judging as judge %}
 {% has_submitted object user as submitted %}
-  <h1>Game  </h1>
-
-  {{object.card_name}}
-  <h3>Rounds {{object.number_of_rounds}}</h3>
-<div class="content">
-  <h3>Current round = {{object.round}}</h3>
-  <h3>Judge = {{ judge }} </h3>
-    <h1>Players</h1>
-    {% for player in object.players.all %}
-    <ul>
-      <li>{{ player }} {% player_score object player %}</li>
-    </ul>
-    {% endfor %}
-
-
+<div class="jumbotron">
+    <div class="row">
+        <div class="col p-0">
+  <p class="lead">Round: {{object.round}}/{{object.number_of_rounds}}</p>
+  <p class="lead">Card name: {{object.card_name}}</p>
+  <p class="lead">Judge: {{ judge }}</p>
   <form method='POST'>
     {% csrf_token %}
-    {% if object.number_of_players > object.players.count %}
-    <h1>Would you like to join this game?</h1>
-    <a class='btn btn-primary' href="{% url 'game:join' pk=object.pk %}">Join Game</a>
+    {% if object.number_of_players > object.players.count and user not in object.players.all %}
+    <hr class="my-4">
+    <p>Would you like to join this game?</p>
+    <p class="lead"><a class='btn btn-primary' href="{% url 'game:join' pk=object.pk %}">Join Game</a></p>
     {% elif user in object.players.all and object.number_of_players > object.players.count %}
-    <h1>We will notify you once your game has enough players to begin.</h1>
+    <p class="lead">{{object.players.count}} of out {{object.number_of_players}} players have joined.  We will notify you once your game has enough players to begin.</p>
     {% elif object.number_of_players == object.players.count and object.in_progress == False %}
-    <a class='btn btn-primary' href="{% url 'game:start' pk=object.pk %}">Start Game</a>
-    {% elif object.in_progress == True and user != judge and submitted == False %}
-    <a class='btn btn-primary' href="{% url 'game:submit' pk=object.pk %}">Submit your card</a>
-    {% else %}
-      <h1>Here are the cards that have been submitted!</h1>
+    <p class="lead"><a class='btn btn-primary' href="{% url 'game:start' pk=object.pk %}">Start Game</a></p>
+    {% elif object.in_progress == True and user != judge and submitted == False%}
+    <p class="lead"><a class='btn btn-primary' href="{% url 'game:submit' pk=object.pk %}">Submit your card</a></p>
     {% endif %}
 
-    {% for player in object.players.all %}
+
+  </form>
+  </div>
+
+  <div class="col p-0">
+      <h1 class="display-4">Players:</h1>
+      {% for player in object.players.all %}
+
+      <p class="lead">{{ player }} {% player_score object player %}<p>
+
+    {% endfor %}
+  </div>
+    </div>
+</div>
+<div class="jumbotron">
+    <div class="row justify-content-around">
+        {% for player in object.players.all %}
       {% for card in object.submissions.all %}
         {% include "submissions/_submissions.html" %}
       {% endfor %}
     {% endfor %}
-  </form>
+    </div>
 </div>
+
+
+
+
+
+
+
+
+<div class="jumbotron">
+  <h1 class="lead-4">Cards from previous rounds:</h1>
+  </div>
+    {% rounds_as_list object as rounds %}
+
+
+    {% for round in rounds %}
+<div class="row justify-content-around">
+    <div class="col">
+        <h3>Round {{round}} cards: </h3>
+    </div>
+    </div>
+    <div class="row justify-content-around">
+     {% for card in object.submissions.all %}
+    {% if card.round_submitted == round and card.submitted == True%}
+        <div class="col">
+            <div class="card" >
+                <div class="card-body">
+                    <h5 class="card-title">{{card.player}}</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><p class="card-text">{{card.card_name}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{card.converted_mana_cost}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{card.card_color}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{card.card_type}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{card.card_text}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{card.flavor_text}}</p></li>
+                </ul>
+            </div>
+        </div>
+
+      {%endif%}
+        {%endfor%}
+        {% endfor%}
+        </div>
+
+
+

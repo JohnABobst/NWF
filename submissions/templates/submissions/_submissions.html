@@ -1,19 +1,32 @@
 {% load custom_tags %}
 
-{% if card.player == player and card.submitted == True %}
-<h1> </h1>
-<li> {{player}} </li>
-  <div class="card">
-    <li>{{card.card_name}}</li>
-    <li>{{card.card_text}}</li>
-    <li>{{card.converted_mana_cost}}</li>
-    <li>{{card.flavor_text}}</li>
-    <li>{{card.card_type}}</li>
-    <li>{{card.card_color}}</li>
-    {% is_judging object.players.all object.judging as judge %}
-    {% if user == judge %}
-    <a class='btn btn-primary' href="{% url 'game:select' pk=object.pk player=card.player %}">Select</a>
-    {% endif %}
+{% if card.player == player and card.submitted == True and card.round_submitted == object.round %}
 
-  </div>
+
+<div class="col">
+            <div class="card" style="width: 20rem" >
+                <div class="card-body">
+                    <h5 class="card-title">{{card.player}}</h5>
+            </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><p class="card-text">{{card.card_name}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{card.converted_mana_cost}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{card.card_color}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{card.card_type}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{card.card_text}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{card.flavor_text}}</p></li>
+                </ul>
+                <div class="card-body">
+                    {% is_judging object.players.all object.judging as judge %}
+                    {% if user == judge %}
+
+                    <a class='btn btn-primary justify-center' href="{% url 'game:select' pk=object.pk player=card.player %}">Select</a>
+
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
 {% endif %}
+

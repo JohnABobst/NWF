@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.contrib.auth import get_user, get_user_model
-
+from django.conf import settings
 
 # Create your views here.
 
@@ -24,7 +24,7 @@ def get_card(game, player):
         this_card = magic_card.objects.get(player=player, game=game,round_submitted=game.round)
         return(this_card)
     except:
-        this_card = magic_card.objects.create(player=player, game=game, card_name=game.card_name)
+        this_card = magic_card.objects.create(player=player, game=game, card_name=game.card_name, round_submitted=game.round)
         this_card.save()
         return(this_card)
 
@@ -37,6 +37,7 @@ class CreateGameView(FormView):
         form.save()
         game = form.instance
         game.card_name = game.get_card_name()
+        game.name = game.game_name()
         game.save()
         InGame.objects.create(player=self.request.user, game=game, score=0)
         return super().form_valid(form)
@@ -81,19 +82,40 @@ class StartGame(LoginRequiredMixin, RedirectView):
             if magic_card.objects.filter(player=player, game=game, card_name=game.card_name, round_submitted=game.round).exists() == False:
                 card = magic_card.objects.create(player=player, game=game, card_name=game.card_name, round_submitted=game.round)
                 card.save()
-        card = get_card(game, self.request.user)
-        subject = 'Your game has started!'
-        message = ('Enough players have signed up to begin playing.  Follow the link to submit a card.' + "\n <href= 'http://johnabobst.pythonanywhere.com/submissions/card_submission/'" + str(card.pk)
-        +'>')
-        game.notify_players(subject, message)
+
+        for player in game.players.all():
+            card = get_card(game, player)
+            list = []
+            list.append(str(player.email))
+            if player != game.judge():
+
+                subject = 'Your game has started!'
+                message = ('Enough players have signed up to begin playing.  Follow the link to submit a card.' + "\n <href= 'http://www.nerdsconamigos.com/submissions/card_submission/" + str(card.pk)
+        +"'>")
+                send_mail(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                list,
+            )
+            else:
+
+                subject = "Your game has started!"
+                message = "You are the judge this round, we will let you know once all cards have been submitted."
+                send_mail(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                list,)
+
         game.save()
         return super().get(request,*args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
         game = get_object_or_404(Game, pk=self.kwargs.get('pk'))
-
-        if self.request.user.username == game.judge(game.round):
-            return reverse('game:game_details', kwargs={'pk':self.pk})
+        card = get_card(game, self.request.user)
+        if self.request.user == game.judge():
+            return reverse('game:game_details', kwargs={'pk':game.pk})
         else:
             return reverse('submissions:card_submission', kwargs={'pk':card.pk})
 
@@ -101,14 +123,13 @@ class SubmitCard(LoginRequiredMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         game = get_object_or_404(Game, pk=self.kwargs.get('pk'))
         card = get_card(game, self.request.user)
-        cards_submitted_this_round = magic_card.objects.filter(game=game, round_submitted=game.round)
+        card.submitted = True
+        cards_submitted_this_round = magic_card.objects.filter(game=game, round_submitted=game.round, submitted = True)
         if cards_submitted_this_round.count() == game.number_of_players -1:
             subject = 'All players have submitted their cards this round'
-            message = 'Follow the link to view the cards.'
+            message = ('Follow the link to view the cards'+ "\n <href= 'http://www.nerdsconamigos.com/game/game_details/" + str(game.pk)+"'>")
             game.notify_players(subject,message)
         return reverse('submissions:card_submission', kwargs={'pk':card.pk})
-
-
 
 
 
@@ -119,8 +140,11 @@ class SelectCard(LoginRequiredMixin, RedirectView):
         card = get_card(game, player)
         update = InGame.objects.get(game=game, player=player)
         subject = 'A card has been chosen'
-        message = 'Follow the link to see which card won this round'
+        message = ('Follow the link to see which card won this round' + "\n <href= 'http://www.nerdsconamigos.com/submissions/card_detail/" + str(card.pk)+"'>")
+        game.notify_players(subject, message)
         game.round += 1
+        if game.round > game.number_of_rounds:
+            game.completed = True
         game.card_name = game.get_card_name()
         if game.judging == game.players.count()-1:
             game.judging = 0

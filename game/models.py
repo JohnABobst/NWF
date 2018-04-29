@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
-
+import random
 # Create your models here.
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django import template
 register = template.Library()
 import sys
-import random
+
 import string
 import os
 from django.core.mail import send_mail
@@ -28,12 +28,19 @@ class Game(models.Model):
     number_of_rounds = models.IntegerField()
     players = models.ManyToManyField(User, through='InGame')
     card_name = models.CharField(max_length=1000)
+    completed = models.BooleanField(default = False)
+    card_sub_types = models.CharField(max_length= 256, blank="True")
+
+    def game_name(self):
+
+        with open(WORDS_DIR + '/cards.txt') as f:
+            cards = f.read().splitlines()
+            card = random.choice(cards)
+        return card
+    name = models.CharField(max_length=300)
 
 
-
-
-
-    def judge(self, number):
+    def judge(self):
         list = []
         for player in self.players.all():
             list.append(player)

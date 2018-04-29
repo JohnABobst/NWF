@@ -1,0 +1,19 @@
+{% load custom_tags %}
+{% rounds_as_string object as rounds %}
+
+{% for round in rounds %}
+    <h3>Round {{round}} cards: </h3>
+    {% for card in object.cards.all %}
+    {% if card.round_submitted == round and card.submitted == True %}
+    <li> {{card.player}} </li>
+      <div class="card">
+        <li>{{card.card_name}}</li>
+        <li>{{card.card_text}}</li>
+        <li>{{card.converted_mana_cost}}</li>
+        <li>{{card.flavor_text}}</li>
+        <li>{{card.card_type}}</li>
+        <li>{{card.card_color}}</li>
+      </div>
+      {%endif%}
+      {%endfor%}
+      {%endfor %}

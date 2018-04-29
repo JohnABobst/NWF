@@ -7,11 +7,11 @@
 {% submission_url object user as card_url %}
 
 {% if object.round > object.number_of_rounds %}
-
-<h1>You have completed the game!</h1>
+<div class="jumbotron"></div>
+<h5 class="display-4">You have completed the game!</h1>
 {% for player in object.players.all %}
 {% if player == won %}
-<h1>{{player}} won the game!</h1>
+<p class="lead">{{player}} won the game with {% player_score object player %} points!</p>
 
 {% else %}
 <ul>
@@ -19,6 +19,40 @@
 </ul>
 {% endif %}
 {% endfor %}
+{% rounds_as_list object as rounds %}
+{% for round in rounds %}
+
+
+<div class="alert alert-primary pt-3">Round {{round}} cards</div>
+<div class="row justify-content-around pb-3">
+    {% for card in object.submissions.all %}
+     {% if card.round_submitted == round and card.submitted == True %}
+     <div class="col">
+     <ul class="list-group list-group-flush border border-dark" style="width:18rem">
+    <li class="list-group-item bg-light">Submitted by: {{card.player}}</li>
+    <li class="list-group-item">{{card.card_name}}</li>
+    <li class="list-group-item">Casting Cost: {{card.converted_mana_cost}}</li>
+    <li class="list-group-item">Card Color: {{card.card_color}}</li>
+
+    <li class="list-group-item">Card Type: {{card.card_type}}</li>
+    <li class="list-group-item">Card Text: {{card.card_text}}</li>
+    <li class="list-group-item">Flavor Text: {{card.flavor_text}}</li>
+  </ul>
+
+    </div>
+{% endif %}
+{% endfor %}
+</div>
+{% endfor %}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -27,6 +61,6 @@
 
 {% endif %}
 
-</div>
+
 
 {% endblock %}

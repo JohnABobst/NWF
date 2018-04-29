@@ -1,10 +1,23 @@
 {% extends "base.html" %}
-
-{% load bootstrap4 %}
-
-
-
 {% block content %}
+{% load bootstrap4 %}
+<div class="jumbotron-fluid">
+<div class="card" style="width: 20rem" >
+                <div class="card-body">
+                    <h5 class="card-title">{{object.player}}</h5>
+            </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><p class="card-text">{{object.card_name}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{object.converted_mana_cost}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{object.card_color}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{object.card_type}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{object.card_text}}</p></li>
+                    <li class="list-group-item"><p class="card-text">{{object.flavor_text}}</p></li>
+                </ul>
 
-
+                </div>
+    <div class="card-body">
+        <a class="btn btn-primary" href="{% url 'game:game_details' pk=object.game.pk %}">Return to Game</a>
+    </div>
+ </div>
   {% endblock %}
